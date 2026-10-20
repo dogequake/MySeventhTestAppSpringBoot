@@ -1,0 +1,56 @@
+package ru.chernyshev.MySeventhTestAppSpringBoot.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+import ru.chernyshev.MySeventhTestAppSpringBoot.dao.StudentRepository;
+import ru.chernyshev.MySeventhTestAppSpringBoot.entity.Student;
+
+@Controller
+public class StudentController {
+
+    private final StudentRepository studentRepository;
+
+    @Autowired
+    public StudentController(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
+    @GetMapping({"/list", "/"})
+    public ModelAndView getAllStudents() {
+        ModelAndView mav = new ModelAndView("list-students");
+        mav.addObject("students", studentRepository.findAll());
+        return mav;
+    }
+
+    @GetMapping("/addStudentForm")
+    public ModelAndView addStudentForm() {
+        ModelAndView mav = new ModelAndView("add-student-form");
+        mav.addObject("student", new Student());
+        return mav;
+    }
+
+    @PostMapping("/saveStudent")
+    public String saveStudent(@ModelAttribute Student student) {
+        studentRepository.save(student);
+        return "redirect:/list";
+    }
+
+    @GetMapping("/showUpdateForm")
+    public ModelAndView showUpdateForm(@RequestParam("studentId") Integer studentId) {
+        ModelAndView mav = new ModelAndView("add-student-form");
+        Student student = studentRepository.findById(studentId).orElse(new Student());
+        mav.addObject("student", student);
+        return mav;
+    }
+
+    @GetMapping("/deleteStudent")
+    public String deleteStudent(@RequestParam("studentId") Integer studentId) {
+        studentRepository.deleteById(studentId);
+        return "redirect:/list";
+    }
+}
